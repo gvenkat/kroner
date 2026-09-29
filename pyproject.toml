@@ -7,7 +7,9 @@ authors = [
     { name = "Venkatakrishnan Ganesh", email = "venkatk@delta18.com" }
 ]
 requires-python = ">=2.7"
-dependencies = []
+dependencies = [
+    "lark>=1.1.5",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.8,<0.13.0"]
