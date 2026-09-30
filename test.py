@@ -1,5 +1,59 @@
 from lark import Lark
 from pprint import pprint
+from typing import Optional
+
+from datetime import datetime
+from collections.abc import Sequence
+
+
+class Cron(Sequence):
+  def __init__(self, line: str):
+    pass
+
+  def __str__(self):
+    pass
+
+  def __repr__(self):
+    pass
+
+  def __list__(self): ...
+
+  # Handle time
+  def tz_name(self, value: str = None):
+    pass
+
+  def next_time(now: datetime = None) -> datetime:
+    pass
+
+  def previous_time(now: datetime = None) -> datetime:
+    pass
+
+  # Iterator
+  def occurances_between():
+
+  def count_occurances(start_at: datetime, end_at: datetime) -> int:
+    pass
+
+  def count_occurrances_for_year() -> int
+    pass
+
+  def count_occurreances_current_year() -> int:
+    pass
+
+  def original(): ...
+  def seconds(): ...
+  def minutes(): ...
+  def hours(): ...
+  def months(): ...
+  def years(): ...
+  def days_of_month(): ...
+  def days_of_week(): ...
+  def timezone(): ...
+
+
+
+
+  def is
 
 GRAMMER = '''
   start: SECONDS WHITESPACE MINUTES WHITESPACE HOUR MONTH_DAY
