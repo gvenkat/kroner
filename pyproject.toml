@@ -17,7 +17,41 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "mypy>=0.720",
+    "mypy>=1.10",
     "pytest>=4.6.11",
-    "ruff>=0.0.17",
+    "ruff>=0.16",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+# Scratch design file, not part of the package
+extend-exclude = ["test.py"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # isort
+    "B",       # flake8-bugbear
+    "UP",      # pyupgrade
+    "SIM",     # flake8-simplify
+    "C4",      # flake8-comprehensions
+    "PT",      # flake8-pytest-style
+    "RUF",     # ruff-specific
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["kroner"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src", "tests"]
+warn_unreachable = true

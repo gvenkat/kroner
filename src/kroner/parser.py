@@ -1,7 +1,7 @@
-from lark import Lark, Tree
+from lark import Lark, Token, Tree
 from lark.exceptions import LarkError
 
-GRAMMAR = r'''
+GRAMMAR = r"""
   // Seconds are optional: 5 fields, 6 fields with seconds, or 7 fields with seconds and years.
   start: seconds _WS minutes _WS hours _WS days_of_month _WS months _WS days_of_week (_WS years)?
        | minutes _WS hours _WS days_of_month _WS months _WS days_of_week
@@ -70,14 +70,14 @@ GRAMMAR = r'''
   NEAREST_WEEKDAY: "W"
 
   _WS: /[ \t]+/
-'''
+"""
 
 _parser = Lark(GRAMMAR)
 
 
-def parse(line: str) -> Tree:
-  """Parse a cron expression into a syntax tree, raising ValueError when it is invalid."""
-  try:
-    return _parser.parse(line.strip())
-  except LarkError as error:
-    raise ValueError('Invalid cron expression %r' % line) from error
+def parse(line: str) -> Tree[Token]:
+    """Parse a cron expression into a syntax tree, raising ValueError when it is invalid."""
+    try:
+        return _parser.parse(line.strip())
+    except LarkError as error:
+        raise ValueError(f'Invalid cron expression {line!r}') from error
