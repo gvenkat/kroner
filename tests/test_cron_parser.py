@@ -266,3 +266,39 @@ class TestOccurrences:
     assert cron.count_occurreances_current_year() == 12
     assert cron.count_occurances(datetime(2026, 1, 1), datetime(2027, 1, 1)) == 12
     assert len(list(cron.occurances_between(datetime(2026, 1, 1), datetime(2027, 1, 1)))) == 12
+
+
+class TestMacros:
+  @pytest.mark.parametrize('macro, expression', [
+    ('@yearly', '0 0 1 1 *'),
+    ('@annually', '0 0 1 1 *'),
+    ('@monthly', '0 0 1 * *'),
+    ('@weekly', '0 0 * * 0'),
+    ('@daily', '0 0 * * *'),
+    ('@midnight', '0 0 * * *'),
+    ('@hourly', '0 * * * *'),
+  ])
+  def test_macro_matches_its_expression(self, macro, expression):
+    cron, expected = Cron(macro), Cron(expression)
+    assert list(cron) == list(expected)
+    assert cron.expression() == expression
+    assert str(cron) == macro
+
+  def test_macros_ignore_case_and_whitespace(self):
+    assert Cron('  @Daily ').expression() == '0 0 * * *'
+
+  def test_macro_next_time(self):
+    now = datetime(2026, 3, 15, 10, 30)
+    assert Cron('@yearly').next_time(now) == datetime(2027, 1, 1)
+    assert Cron('@monthly').next_time(now) == datetime(2026, 4, 1)
+    assert Cron('@weekly').next_time(now) == datetime(2026, 3, 22)
+    assert Cron('@daily').next_time(now) == datetime(2026, 3, 16)
+    assert Cron('@hourly').next_time(now) == datetime(2026, 3, 15, 11)
+
+  def test_macro_with_time_zone(self):
+    cron = Cron('@daily', tz_name='America/New_York')
+    assert cron.next_time(datetime(2026, 3, 15, 10, 30)) == datetime(2026, 3, 16, tzinfo=NEW_YORK)
+
+  @pytest.mark.parametrize('line', ['@', '@never', '@daily 5', 'daily'])
+  def test_unknown_macros_are_invalid(self, line):
+    assert parse_cron(line) is None

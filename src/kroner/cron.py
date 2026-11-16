@@ -14,6 +14,17 @@ WEEK_DAY_NAMES = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 FIRST_YEAR, LAST_YEAR = 1970, 2099
 ONE_SECOND = timedelta(seconds=1)
 
+# Non-standard shorthands and the expressions they stand for
+MACROS = {
+  '@yearly': '0 0 1 1 *',
+  '@annually': '0 0 1 1 *',
+  '@monthly': '0 0 1 * *',
+  '@weekly': '0 0 * * 0',
+  '@daily': '0 0 * * *',
+  '@midnight': '0 0 * * *',
+  '@hourly': '0 * * * *',
+}
+
 
 class _Field:
   def __init__(self, values, specials=(), restricted=True):
@@ -155,11 +166,18 @@ class Cron(Sequence):
   Accepts 5 fields (minutes to days of week), 6 fields (with leading seconds)
   or 7 fields (with seconds and trailing years). As a sequence it holds the
   expanded seconds, minutes, hours, days of month, months, days of week and years.
+
+  The shorthands in MACROS (such as "@daily") are accepted too.
   """
 
   def __init__(self, line: str, tz_name: Optional[str] = None):
     self._line = line
-    fields = {field.data: field for field in parse(line).children}
+    self._tz: Optional[ZoneInfo] = None
+    if tz_name is not None:
+      self.tz_name(tz_name)
+
+    macro = line.strip().lower()
+    fields = {field.data: field for field in parse(MACROS.get(macro, line)).children}
 
     self._seconds = _parse_field(fields['seconds'], 0, 59) if 'seconds' in fields else _Field([0])
     self._minutes = _parse_field(fields['minutes'], 0, 59)
@@ -171,10 +189,6 @@ class Cron(Sequence):
       self._years = _parse_field(fields['years'], FIRST_YEAR, LAST_YEAR)
     else:
       self._years = _Field(range(FIRST_YEAR, LAST_YEAR + 1))
-
-    self._tz: Optional[ZoneInfo] = None
-    if tz_name is not None:
-      self.tz_name(tz_name)
 
   def __str__(self):
     return self._line
@@ -192,6 +206,10 @@ class Cron(Sequence):
 
   def __len__(self):
     return 7
+
+  def expression(self) -> str:
+    """The expression with any shorthand such as "@daily" replaced by its fields."""
+    return MACROS.get(self._line.strip().lower(), self._line.strip())
 
   # Handle time
   def tz_name(self, value: Optional[str] = None) -> Optional[str]:
